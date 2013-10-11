@@ -3,7 +3,6 @@
   "version": "0.0.1",
   "author": "Illniyar",
   "description": "an authentication module for moonshine-js",
-  "private":true,
   "repository": {
     "type": "git",
     "url": "git://github.com/Illniyar/moon-contrib-user"
