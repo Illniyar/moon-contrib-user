@@ -1,6 +1,6 @@
 {
   "name": "moon-contrib-user",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "author": "Illniyar",
   "description": "an authentication module for moonshine-js",
   "repository": {
@@ -12,12 +12,14 @@
     "url": "http://opensource.org/licenses/MIT"
   },
   "homepage": "https://github.com/Illniyar/moon-contrib-user",
+  "dependencies": {
+      "passport":"*"
+  },
   "peerDependencies": {
     "moonshine-js":"*",
     "passport":"*"
   },
   "devDependencies": {
-    "moonshine-js":"*",
-    "passport":"*"
+    "moonshine-js":"*"
   }
 }
