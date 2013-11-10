@@ -1,6 +1,6 @@
 {
   "name": "moon-contrib-user",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "author": "Illniyar",
   "description": "an authentication module for moonshine-js",
   "repository": {
@@ -11,15 +11,17 @@
     "type": "MIT",
     "url": "http://opensource.org/licenses/MIT"
   },
+  "main":"./src",
+  "scripts": {
+    "test": "mocha --harmony-proxies --recursive --reporter Spec test/**/*.spec.js"
+  },
   "homepage": "https://github.com/Illniyar/moon-contrib-user",
-  "dependencies": {
-      "passport":"*"
-  },
   "peerDependencies": {
-    "moonshine-js":"*",
-    "passport":"*"
+    "moonshine-js":"~0.0.5",
+    "passport":"~0.1.17"
   },
-  "devDependencies": {
-    "moonshine-js":"*"
-  }
+  "devDependencies":[
+    "mocha",
+    "superagent"
+  ]
 }

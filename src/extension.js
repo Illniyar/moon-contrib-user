@@ -3,7 +3,7 @@ var settings = moonshine.settings
 var logger = moonshine.logFactory()
 var passport = require("passport");
 
-module.exports.pre = function(cb){
+module.exports.setup = function(cb){
     registerService()
     var validationErr = validateSettings(settings);
     if (validationErr) {
@@ -11,9 +11,13 @@ module.exports.pre = function(cb){
     }
     configureExpress(moonshine.server.app)
     configureSerialization();
+    moonshine.addHook("api.resources_loaded",onResourceLoaded)
+    cb()
+}
+function onResourceLoaded(done){
     configureApiAuthentication()
     configureAuthorizationOnResources();
-    cb()
+    done()
 }
 
 function registerService() {
@@ -21,13 +25,14 @@ function registerService() {
         auth: {
             addStrategy:passport.use,
             authenticate:passport.authenticate.bind(passport),
-            native:passport
+            native:passport,
+            getUser:getUser
         }
     })
 }
 function configureExpress(app) {
-        var express = moonshine.server.native
-		app.configure(function(){
+    var express = moonshine.server.native
+    app.configure(function(){
 		app.use(express.cookieParser(settings.COOKIE_SECRET_TOKEN));
 		app.use(express.bodyParser());
 		app.use(express.session({secret: settings.SESSION_SECRET_TOKEN}))
@@ -49,7 +54,7 @@ function configureSerialization() {
 	});
 
 	passport.deserializeUser(function(id, done) {
-	  moonshine.persistence.models.User.findById(id, function (err, user) {
+	  moonshine.db.models.User.findById(id, function (err, user) {
 		done(err, user);
 	  });
 	});
@@ -77,10 +82,10 @@ function configureAuthorizationOnResources(){
 						|| (!settings.USER_REQUIRE_AUTH_BY_DEFAULT &&  rOptions.requireAuth !== true) //only an explicit true should prevent authentication
 		var resource = moonshine.api.resources[rName]
 		resource.documents("get",function(req,res,next){
-			var Model = request.app.get('model');
+			var Model = req.app.get('model');
 			if (!Model.authorize) return next()
-			if (typeof request.baucis.documents == 'number') Model.authorize(getUser(req),"count",null,req.app.getFindByConditions(req));
-			var objs = [].concat(documents);
+			if (typeof req.baucis.documents == 'number') Model.authorize(getUser(req),"count",null,req.app.getFindByConditions(req));
+			var objs = [].concat(req.baucis.documents);
 			for (var i in objs) {
 				var obj = objs[i];
 				if (!Model.authorize(getUser(req),"view",obj)){
@@ -91,7 +96,7 @@ function configureAuthorizationOnResources(){
 			next()
 		})	
 		resource.query("instance","put",function(req,res,next){
-			var Model = request.app.get('model');
+			var Model = req.app.get('model');
 			if (!Model.authorize) return next()
 			req.baucis.query.exec(function(err,doc){
 				if (err) return next(err)
@@ -102,7 +107,8 @@ function configureAuthorizationOnResources(){
 				}
 				next()
 			})
-		})	
+		})
+
 		resource.request("collection","post",function(req,res,next){
 			var Model = req.app.get('model');
 			if (!Model.authorize) return next()

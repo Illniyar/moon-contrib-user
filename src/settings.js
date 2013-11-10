@@ -8,6 +8,4 @@ module.exports.config = function(settings) {
 	settings.USER_ALLOW_NEW_REGISTRATION = true
     settings.USER_REQUEST_PROPERTY_NAME = "user"
     settings.COOKIE_SECRET_TOKEN =  settings.COOKIE_SECRET_TOKEN || "this should also be changed"
-
-    settings.middleware.push(require.resolve("./middleware"))
 }
