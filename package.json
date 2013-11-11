@@ -13,7 +13,8 @@
   },
   "main":"./src",
   "scripts": {
-    "test": "mocha --harmony-proxies --recursive --reporter Spec test/**/*.spec.js"
+    "test": "moonshine test",
+    "start": "moonshine runserver"
   },
   "homepage": "https://github.com/Illniyar/moon-contrib-user",
   "peerDependencies": {
@@ -22,6 +23,8 @@
   },
   "devDependencies":[
     "mocha",
-    "superagent"
+    "superagent",
+    "karma",
+    "karma-mocha"
   ]
 }
