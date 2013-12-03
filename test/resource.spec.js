@@ -23,7 +23,7 @@ describe("user",function(){
                 })
         })
 
-    })D
+    })
     describe("logged in",function(){
         var user = null;
         var agent = null;
