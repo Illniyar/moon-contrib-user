@@ -1,10 +1,10 @@
 var expect = chai.expect
 describe("authentication service",function(){
     beforeEach(angular.mock.module('user.authentication',function(authenticationProvider){
-        authenticationProvider.registerAuthenticatior("success",function(authInfo,cb){
+        authenticationProvider.registerAuthenticator("success",function(authInfo,cb){
             setTimeout(function(){cb(null,{authInfo:authInfo,success:true})},0)
         })
-        authenticationProvider.registerAuthenticatior("failure",function(authInfo,cb){
+        authenticationProvider.registerAuthenticator("failure",function(authInfo,cb){
             setTimeout(function(){cb(new Error("don't log in"))},0)
         })
     }))

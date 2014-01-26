@@ -7,7 +7,7 @@
     }
     function authenticationProvider() {
         var authenticators = {}
-        this.registerAuthenticatior = function registerAuthenticatior(name,authenticator) {
+        this.registerAuthenticator = function registerAuthenticator(name,authenticator) {
             if (!authenticator) {
                 authenticator = name;
                 name = "default"
@@ -24,8 +24,8 @@
                 authenticators.default = arg
             }
         }
-        this.$get = [ '$location', '$q','$http','moonbridge','$rootScope',
-            function ($location, $q,$http,moonbridge,$rootScope) {
+        this.$get = [ '$location', '$q','$http','Restangular','$rootScope',
+            function ($location, $q,$http,Restangular,$rootScope) {
             var authentication = {};
             var firstTimeUserDefer = $q.defer()
             var onSuccessQueue = $q.defer();
@@ -46,7 +46,7 @@
             authentication.checkAuthenticated = function(force){
                 if (!force && checkAuthPromise) return checkAuthPromise;
                 var deferred = $q.defer();
-                moonbridge.one('users','me').get().then(function(user){
+                Restangular.one('users','me').get().then(function(user){
                     performLogin(user);
                     deferred.resolve(true)
                 },function(response){
@@ -83,16 +83,16 @@
                 authentication.queue(function(){
                     authentication.redirectToNext()
                 })
-                $location.path(authentication.loginPagePath)
+                $location.path(authentication.loginRoute)
             }
             authentication.redirectToNext = function() {
                 $location.path(authentication.nextLocation);
             }
-            authentication.loginPagePath = "/login"
+            authentication.loginRoute = "/login"
             authentication.nextLocation = "/"
             authentication.register = function (user,cb) {
                 var deferred =$q.defer()
-                moonbridge.all('users').post(user).then(function(newUser){
+                Restangular.all('users').post(user).then(function(newUser){
                     authentication.user = newUser
                     performLogin(newUser)
                     deferred.resolve(user);
@@ -125,14 +125,18 @@
             return authentication;
         }]
     }
-	var authenticationModule = angular.module("user.authentication",["api.moonbridge"])
+	var authenticationModule = angular.module("user.authentication",["moon.angular"])
     authenticationModule.constant('authenticatedOnly',authenticatedOnly)
     authenticationModule.constant('notForAuthenticated',notForAuthenticated)
     authenticationModule.provider('authentication', authenticationProvider)
 
 	authenticationModule.controller("AuthLoginCtrl",["$scope","authentication",function($scope,authentication) {
 		$scope.authentication = authentication;
-		$scope.user = {};
+		$scope.user = authentication.user;
+        authentication.queue(function(user){
+            $scope.state= "authenticated"
+            $scope.$emit("auth.authend",null,user);
+        })
 		$scope.state = "waiting"
 		$scope.login = function() {
 			$scope.state= "authenticating"
@@ -149,7 +153,7 @@
 	}])
 	authenticationModule.controller("AuthRegisterCtrl",["$scope","authentication",function($scope,authentication) {
 		$scope.authentication = authentication;
-		$scope.user = {};
+		$scope.user = authentication.user;
 		$scope.state = "waiting"
 		$scope.register = function() {
 			$scope.state= "registering"
@@ -167,7 +171,7 @@
 
     authenticationModule.controller("AuthLogoutCtrl",["$scope","authentication",function($scope,authentication) {
         $scope.authentication = authentication;
-        $scope.user = {};
+        $scope.user = authentication.user;
         $scope.state = "waiting"
         $scope.logout = function() {
             $scope.state= "logging out"
@@ -187,7 +191,7 @@
             if (next.permission && angular.isFunction(next.permission)) {
                 var waitForMe = $q.defer()
                 if (!next.resolve) next.resolve = {}
-                next.resolve.loggedIn = waitForMe.promise;
+                next.resolve.loggedIn = function(){return waitForMe.promise};
                 authentication.checkAuthenticated().then(function(loggedIn){
                     next.permission(loggedIn,authentication)
                     waitForMe.resolve(true)

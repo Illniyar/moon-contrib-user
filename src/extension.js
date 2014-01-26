@@ -81,6 +81,13 @@ function configureAuthorizationOnResources(){
 		var needsAuth = (settings.USER_REQUIRE_AUTH_BY_DEFAULT &&  rOptions.requireAuth !== false) //only an explicit false should prevent authentication
 						|| (!settings.USER_REQUIRE_AUTH_BY_DEFAULT &&  rOptions.requireAuth !== true) //only an explicit true should prevent authentication
 		var resource = moonshine.api.resources[rName]
+
+		resource.query("collection","get",function(req,res,next){
+			var Model = req.app.get('model');
+			if (!Model.applyLimit) return next();
+			Model.applyLimit(getUser(req),req.baucis.query)
+			next()
+		})
 		resource.documents("get",function(req,res,next){
 			var Model = req.app.get('model');
 			if (!Model.authorize) return next()
