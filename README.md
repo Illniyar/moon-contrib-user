@@ -22,6 +22,11 @@ Moon-contrib-user is a User and Authentication Component for [Moonshine](https:/
 
 * __*Resource options*__:
  * __requireAuth__: determines if a resource is only visible to authenticated users. (see also settings:USER_REQUIRE_AUTH_BY_DEFAULT)
+ 
+* __*Entities*__:
+ *__user__: a new, user entity has been added both as a model and a resource.
+    *__"/users/me"__ : this route allows viewing the authenticated user's resource.
+	*__"/users/logout"__: this route allows logging out for the authenticated user. This api takes no payload, and returns a 204 response.
 
 
 * __*Model extensions*__:
